@@ -1,0 +1,87 @@
+#include <M5Core2.h>
+
+// LCD Details
+// 320 x 240 pixels (width x height)
+//      - (0, 0) is the TOP LEFT pixel
+//      - Colors seem to be 16-bit as: RRRR RGGG GGGB BBBB (32 Reds, 64 Greens, 32 Blues)
+//      TFT_RED         0xF800      /* 255,   0,   0 */     1111 1000 0000 0000
+//      TFT_GREEN       0x07E0      /*   0, 255,   0 */     0000 0111 1110 0000
+//      TFT_BLUE        0x001F      /*   0,   0, 255 */     0000 0000 0001 1111
+uint32_t screenColor;
+
+///////////////////////////////////////////////////////////////
+// Put your setup code here, to run once
+///////////////////////////////////////////////////////////////
+void setup() {
+	// Initialize the device
+    M5.begin();
+    // Initialize the device
+    M5.begin();
+	
+    // Set up some variables for use in drawing
+    int w = M5.Lcd.width();
+    int h = M5.Lcd.height();
+    Serial.printf("%d by %d resolution\n", w, h);
+    M5.Lcd.fillScreen(CYAN);
+    int unit = 10;
+
+
+	  // TODO 0: Draw the base of the snowman
+    // https://github.com/m5stack/m5-docs/blob/master/docs/en/api/lcd.md#fillcircle
+    M5.Lcd.fillCircle(w/2,h-unit*4,unit*4,WHITE);
+
+    // TODO 1: Draw the body and head (2 iterations)
+    M5.Lcd.fillCircle(w/2,h-unit*10,unit*3,WHITE);
+    M5.Lcd.fillCircle(w/2,h-unit*14,unit*2,WHITE);
+    // TODO 2: Draw 3 buttons
+    M5.Lcd.fillCircle(w/2,h-unit*4,unit / 2,BLACK);
+    M5.Lcd.fillCircle(w/2,h-unit*7,unit / 2,BLACK);
+    M5.Lcd.fillCircle(w/2,h-unit*10,unit / 2,BLACK);
+
+    // TODO 3: Draw 2 eyes
+    M5.Lcd.fillCircle(w/2 - unit/2,h-unit*14,4,BLACK);
+    M5.Lcd.fillCircle(w/2 + unit/2,h-unit*14,4,BLACK);
+    // TODO 4: Draw a carrot nose
+    M5.Lcd.fillTriangle(w/2 - 5, h-unit*13 - 5,w/2 + 5, h-unit*13 - 5,w/2,h-unit*12,ORANGE);
+
+
+    //My own extra hat
+    M5.Lcd.fillRect(w/2 - unit*4, h - unit*17,unit*8, unit*2, BLUE);
+    M5.Lcd.fillRect(w/2 - unit*2, h - unit*19,unit*4, unit*4, BLUE);
+
+    M5.Lcd.fillCircle(3*w/4, h - unit*3,unit*2,GREEN);
+    M5.Lcd.fillCircle(3*w/4 - unit/2, h - unit*3,unit/2,BLACK);
+    M5.Lcd.fillCircle(3*w/4 + unit/2, h - unit*3,unit/2,BLACK);
+    M5.Lcd.drawLine(3*w/4 - unit, h - unit*2, 3*w/4 - unit, h, BLACK);
+    M5.Lcd.drawLine(3*w/4 + unit, h - unit*2, 3*w/4 + unit, h, BLACK);
+    M5.Lcd.drawLine(3*w/4 - 2*unit, h - unit*3, 3*w/4 - unit*2, h - unit, BLACK);
+    M5.Lcd.drawLine(3*w/4 + 2*unit, h - unit*3, 3*w/4 + unit*2, h - unit, BLACK);
+    
+    screenColor = 0000000000000000;
+
+}
+
+///////////////////////////////////////////////////////////////
+// Put your main code here, to run repeatedly
+///////////////////////////////////////////////////////////////
+void loop() {
+  M5.update();
+
+  if(M5.BtnA.wasPressed()){
+    Serial.print("Red increase");
+    screenColor = screenColor + 100000000000;
+  }else if (M5.BtnB.wasPressed()){
+    Serial.print("green increase");
+    screenColor = screenColor + 100000;
+  }else if (M5.BtnC.wasPressed()){
+    Serial.print("blue increase\n");
+    Serial.print(String(screenColor) + "\n");
+    screenColor = screenColor + 1;
+  }
+
+  M5.Lcd.fillScreen(screenColor);
+}
+//////////////////////////////////////////////////////////////////////////////////
+// For more documentation see the following link:
+// https://github.com/m5stack/m5-docs/blob/master/docs/en/api/
+//////////////////////////////////////////////////////////////////////////////////

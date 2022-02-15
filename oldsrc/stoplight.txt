@@ -1,0 +1,50 @@
+#include <Arduino.h>
+#include <M5Core2.h>
+
+//Goal: green to yellor to red to green
+
+static unsigned long secondsOn = 0;
+static unsigned long lastTS;
+static bool stopped = false;
+
+void setup() {
+  // Initialize the device so it is responsive
+  M5.begin();
+  M5.Lcd.fillScreen(GREEN);
+  lastTS = millis();
+}
+
+void loop() {
+  M5.update();
+
+  if (M5.BtnA.wasPressed()) {
+    stopped = !stopped;
+  }
+
+  // Do some stuff repeatedly
+  if(!stopped){
+    if(millis() >= lastTS + 1000){
+      secondsOn++;
+      lastTS = millis();
+      if(secondsOn % 3 == 1){
+        M5.Lcd.fillScreen(YELLOW);
+      }else if (secondsOn % 3 == 2){
+        M5.Lcd.fillScreen(RED);
+      }else if (secondsOn % 3 == 0){
+        M5.Lcd.fillScreen(GREEN);
+      }
+    }
+  }else{
+      if(millis() >= lastTS + 500){
+        secondsOn++;
+        lastTS = millis();
+        if(secondsOn % 2 == 0){
+            M5.Lcd.fillRect(0,0,M5.Lcd.width()/2,M5.Lcd.height(), BLUE);
+            M5.Lcd.fillRect(M5.Lcd.width()/2,0,M5.Lcd.width(),M5.Lcd.height(), RED);
+        }else if (secondsOn % 2 == 1){
+            M5.Lcd.fillRect(0,0,M5.Lcd.width()/2,M5.Lcd.height(), RED);
+            M5.Lcd.fillRect(M5.Lcd.width()/2,0,M5.Lcd.width(),M5.Lcd.height(), BLUE);
+        }
+      }
+  }
+}

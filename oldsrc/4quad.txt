@@ -1,0 +1,38 @@
+#include <M5Core2.h>
+#include <Arduino.h>
+
+int w;
+int h;
+static bool tl = false;
+static bool tr = false;
+static bool br = false;
+static bool bl = false;
+
+void setup(){
+    M5.begin();
+    w = M5.Lcd.width();
+    h = M5.Lcd.height();
+    M5.Lcd.fillScreen(BLUE);
+}
+
+void loop(){
+  M5.update();
+
+  if(M5.Touch.ispressed()){
+    Point location = M5.Touch.getPressPoint();
+    if(location.x < w / 2 && location.y < h / 2){
+      bl = !bl;
+      M5.Lcd.fillRect(0,0,w / 2,h/2, (bl ? WHITE : BLUE));
+    }else if (location.x < w / 2 && location.y >= h / 2){
+      tl = !tl;
+      M5.Lcd.fillRect(0,h/2,w / 2,h, (tl ? WHITE : BLUE));
+    }else if (location.x >= w / 2 && location.y < h / 2){
+      br = !br;
+      M5.Lcd.fillRect(w/2,0,w,h/2, (br ? WHITE : BLUE));
+    }else{
+      tr = !tr;
+      M5.Lcd.fillRect(w/2,h/2,w,h, (tr ? WHITE : BLUE));
+    }
+  }
+
+}
