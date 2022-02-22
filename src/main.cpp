@@ -1,15 +1,8 @@
-#include <Adafruit_VCNL4040.h>
 #include <M5Core2.h>
 
 Adafruit_VCNL4040 vcnl4040 = Adafruit_VCNL4040();
 
-void setup() {
-  Serial.begin(115200);
-  M5.begin();
-  // Wait until serial port is opened
-  while (!Serial) { delay(1); }
 
-  Serial.println("Adafruit VCNL4040 Config demo");
 
   if (!vcnl4040.begin()) {
     Serial.println("Couldn't find VCNL4040 chip");
