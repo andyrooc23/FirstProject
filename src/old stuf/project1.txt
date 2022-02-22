@@ -1,6 +1,7 @@
 #include <M5Core2.h>
 #include <ArduinoJson.h>
 #include <HTTPClient.h>
+#include <NTPClient.h>
 #include "EGR425_Phase1_weather_bitmap_images.h"
 #include "WiFi.h"
 
@@ -9,11 +10,12 @@
 ////////////////////////////////////////////////////////////////////
 // TODO 3: Register for openweather account and get API key
 String urlOpenWeather = "https://api.openweathermap.org/data/2.5/weather?";
-String apiKey = "YOUR_API_KEY";
+String apiKey = "033baa727a3dbdbcbbf8df1e22f6bf28";
 
 // TODO 1: WiFi variables
 String wifiNetworkName = "CBU";
 String wifiPassword = "";
+boolean imp = true;
 
 // Time variables
 unsigned long lastTime = 0;
@@ -22,6 +24,10 @@ unsigned long timerDelay = 5000;  // 5000; 5 minutes (300,000ms) or 5 seconds (5
 // LCD variables
 int sWidth;
 int sHeight;
+
+// Time Client
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP);
 
 ////////////////////////////////////////////////////////////////////
 // Method header declarations
@@ -49,12 +55,20 @@ void setup() {
     }
     Serial.print("\n\nConnected to WiFi network with IP address: ");
     Serial.println(WiFi.localIP());
+    timeClient.begin();
+    timeClient.setTimeOffset(-28800);
 }
 
 ///////////////////////////////////////////////////////////////
 // Put your main code here, to run repeatedly
 ///////////////////////////////////////////////////////////////
 void loop() {
+    M5.update();
+
+    if(M5.BtnA.wasPressed()){
+        imp = !imp;
+    }
+
 
     // Only execute every so often
     if ((millis() - lastTime) > timerDelay) {
@@ -64,7 +78,10 @@ void loop() {
             // TODO 4: Hardcode the specific city,state,country into the query
             // Examples: https://api.openweathermap.org/data/2.5/weather?q=riverside,ca,usa&units=imperial&appid=YOUR_API_KEY
             //////////////////////////////////////////////////////////////////
-            String serverURL = urlOpenWeather + "q=des+moines,ia,usa&units=imperial&appid=" + apiKey;
+            String imperial = urlOpenWeather + "q=riverside,ca,usa&units=imperial&appid=" + apiKey;
+            String celcius = urlOpenWeather + "q=riverside,ca,usa&appid=" + apiKey;
+
+            String serverURL = imp ? imperial : celcius;
             //Serial.println(serverURL); // Debug print
 
             //////////////////////////////////////////////////////////////////
@@ -159,17 +176,29 @@ void loop() {
             M5.Lcd.setCursor(pad, pad);
             M5.Lcd.setTextColor(TFT_BLUE);
             M5.Lcd.setTextSize(3);
-            M5.Lcd.printf("LO:%0.fF\n", tempMin);
+            if(imp){
+                M5.Lcd.printf("LO:%0.fF\n", tempMin);
+            }else{
+                M5.Lcd.printf("LO:%0.fC\n", tempMin);
+            }
             
             M5.Lcd.setCursor(pad, M5.Lcd.getCursorY());
             M5.Lcd.setTextColor(primaryTextColor);
             M5.Lcd.setTextSize(10);
-            M5.Lcd.printf("%0.fF\n", tempNow);
+            if(imp){
+                M5.Lcd.printf("LO:%0.fF\n", tempNow);
+            }else{
+                M5.Lcd.printf("LO:%0.fC\n", tempNow);
+            }
 
             M5.Lcd.setCursor(pad, M5.Lcd.getCursorY());
             M5.Lcd.setTextColor(TFT_RED);
             M5.Lcd.setTextSize(3);
-            M5.Lcd.printf("HI:%0.fF\n", tempMax);
+            if(imp){
+                M5.Lcd.printf("LO:%0.fF\n", tempMax);
+            }else{
+                M5.Lcd.printf("LO:%0.fC\n", tempMax);
+            }
 
             M5.Lcd.setCursor(pad, M5.Lcd.getCursorY());
             M5.Lcd.setTextColor(primaryTextColor);
@@ -178,11 +207,24 @@ void loop() {
             Serial.println("WiFi Disconnected");
         }
 
+
+
+        // My added on code
+        timeClient.update();
+
+        M5.Lcd.setCursor(5,170);
+        M5.Lcd.setTextColor(TFT_DARKGREY);
+        Serial.print(timeClient.getFormattedTime());
+        Serial.printf("Time: %s\n", timeClient.getFormattedTime());
+
+        // M5.Lcd.printf("Time: ", timeClient.getFormattedTime());
+
+        // Stop my code
+
         // Update the last time to NOW
         lastTime = millis();
     }
 }
-
 /////////////////////////////////////////////////////////////////
 // This method takes in a URL and makes a GET request to the
 // URL, returning the response.
